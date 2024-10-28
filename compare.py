@@ -72,9 +72,8 @@ def main():
     parser.add_argument('file2', help="Path to the second file")
     parser.add_argument(
         '--method', choices=['line', 'hash', 'byte', 'csv'], default='line',
-        help="Comparison method: 'line' for line-by-line, 'hash' for hash-based, 'byte' for byte-by-byte. Default is 'line'."
+        help="Comparison method: 'line' for line-by-line, 'hash' for hash-based, 'byte' for byte-by-byte, 'csv' for csv-by-csv. Default is 'line'."
     )
-
     args = parser.parse_args()
 
     if args.method == 'line':
