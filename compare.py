@@ -1,6 +1,7 @@
 import argparse
 import difflib
 import hashlib
+import csv
 
 # ===== Functions for different comparison methods =====
 
@@ -51,6 +52,18 @@ def compare_files_byte_by_byte(file1, file2):
 
     print("Files are identical.")
 
+
+def compare_csv_cells(file1, file2):
+    with open(file1, 'r') as f1, open(file2, 'r') as f2:
+        reader1 = csv.reader(f1)
+        reader2 = csv.reader(f2)
+
+        for row_num, (row1, row2) in enumerate(zip(reader1, reader2), start=1):
+            for col_num, (cell1, cell2) in enumerate(zip(row1, row2), start=1):
+                if cell1.strip() != cell2.strip():  # Strip to remove any extra whitespace
+                    print(f"Difference at Row {row_num}, Column {col_num}: '{cell1}' != '{cell2}'")
+
+
 # ===== Main function with argument parsing =====
 
 def main():
@@ -58,7 +71,7 @@ def main():
     parser.add_argument('file1', help="Path to the first file")
     parser.add_argument('file2', help="Path to the second file")
     parser.add_argument(
-        '--method', choices=['line', 'hash', 'byte'], default='line',
+        '--method', choices=['line', 'hash', 'byte', 'csv'], default='line',
         help="Comparison method: 'line' for line-by-line, 'hash' for hash-based, 'byte' for byte-by-byte. Default is 'line'."
     )
 
@@ -70,6 +83,8 @@ def main():
         compare_files_by_hash(args.file1, args.file2)
     elif args.method == 'byte':
         compare_files_byte_by_byte(args.file1, args.file2)
+    elif args.method == 'csv':
+        compare_csv_cells(args.file1, args.file2)
 
 if __name__ == '__main__':
     main()
