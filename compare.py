@@ -4,6 +4,7 @@ import hashlib
 import csv
 
 # ===== Functions for different comparison methods =====
+import difflib
 
 def compare_files_line_by_line(file1, file2):
     """Compares two files line by line and prints the differences."""
@@ -11,14 +12,21 @@ def compare_files_line_by_line(file1, file2):
         file1_lines = f1.readlines()
         file2_lines = f2.readlines()
 
+    # Generate a unified diff and print if differences exist
     diff = difflib.unified_diff(file1_lines, file2_lines, fromfile=file1, tofile=file2)
     differences = list(diff)
+    
     if differences:
         print("Differences found:")
         for line in differences:
             print(line, end='')
     else:
         print("Files are identical.")
+        
+    # Check if one file has extra lines
+    if len(file1_lines) != len(file2_lines):
+        print(f"\nFiles differ in length: {file1} has {len(file1_lines)} lines, {file2} has {len(file2_lines)} lines.")
+
 
 def compare_files_by_hash(file1, file2):
     """Compares two files by generating their SHA256 hashes."""
@@ -37,20 +45,26 @@ def compare_files_by_hash(file1, file2):
     else:
         print(f"Files {file1} and {file2} are different.")
 
-def compare_files_byte_by_byte(file1, file2):
-    """Compares two files byte by byte."""
+def compare_files_byte_by_byte(file1, file2, chunk_size=4096):
+    """Compares two files byte by byte, reading in chunks for efficiency."""
     with open(file1, 'rb') as f1, open(file2, 'rb') as f2:
         while True:
-            byte1 = f1.read(1)
-            byte2 = f2.read(1)
+            chunk1 = f1.read(chunk_size)
+            chunk2 = f2.read(chunk_size)
 
-            if byte1 != byte2:
-                print(f"Files differ at byte position {f1.tell()}")
-                return
-            if not byte1:  # End of file
+            if chunk1 != chunk2:
+                # Find the exact position where the files differ within the chunk
+                for i, (b1, b2) in enumerate(zip(chunk1, chunk2)):
+                    if b1 != b2:
+                        position = f1.tell() - len(chunk1) + i
+                        print(f"Files differ at byte position {position}")
+                        return
+
+            if not chunk1:  # End of file
                 break
 
     print("Files are identical.")
+
 
 
 def compare_csv_cells(file1, file2):
@@ -62,6 +76,7 @@ def compare_csv_cells(file1, file2):
             for col_num, (cell1, cell2) in enumerate(zip(row1, row2), start=1):
                 if cell1.strip() != cell2.strip():  # Strip to remove any extra whitespace
                     print(f"Difference at Row {row_num}, Column {col_num}: '{cell1}' != '{cell2}'")
+    print("CSV files compared and are identical.")
 
 
 # ===== Main function with argument parsing =====
