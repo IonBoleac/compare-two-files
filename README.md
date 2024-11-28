@@ -4,6 +4,7 @@ There are some method to compare two files:
 - line-by-line comparison
 - hash-by-hash comparison
 - byte-by-byte comparison
+- csv-by-csv comparison
 
 ## How to use
 ```bash
